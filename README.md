@@ -42,10 +42,12 @@ the same shape in each engine:
 ## Consuming this from a Unity or Godot project
 
 Both consumer repos compile plain `.cs` files directly (no NuGet package is published); add this
-repo as a git submodule anywhere under the consuming project:
+repo as a git submodule at the root of the consuming project — it's shared code co-maintained
+across both plugins, not vendored third-party code, so avoid burying it under a `ThirdParty/`-style
+folder:
 
 ```
-git submodule add https://github.com/qwe321qwe321qwe321/steam-itchio-deploy-core.git ThirdParty/SteamItchIoDeployCore
+git submodule add https://github.com/qwe321qwe321qwe321/steam-itchio-deploy-core.git SteamItchIoDeployCore
 ```
 
 Only `src/` is meant to be compiled by consumers — it carries its own Unity `.asmdef` so a Unity
@@ -54,6 +56,19 @@ is deliberately named with a leading dot: both Unity's `AssetDatabase` and the d
 project glob Godot's C# projects use ignore dot-prefixed directories, so it's automatically excluded
 from whatever a consuming project compiles, even though the whole repo is checked out as one
 submodule (no sparse-checkout or exclude rules required on the consumer's side).
+
+### Editor asset metadata
+
+`src/` also carries a `.gdignore` marker file, so Godot's filesystem scanner skips it entirely —
+no `.uid` files get generated for these scripts, and they never show up as importable resources in
+the FileSystem dock. `.gdignore` only affects Godot's *resource* importer; the Godot.NET.Sdk C#
+build still compiles everything here normally, since that goes through MSBuild's own default item
+glob, a completely separate mechanism. This repo's own `.meta` files (for Unity's `AssetDatabase`)
+*are* committed, unlike the Godot `.uid` files — Unity has no `.gdignore` equivalent, since for
+Unity, being importable as an asset (and therefore needing a `.meta` file with a stable GUID) is a
+prerequisite for the C# compiler to see the code at all, not a separate opt-in step. If you add new
+files here, open this repo once in a Unity Editor so it generates `.meta` files for them, then
+commit those `.meta` files.
 
 Every type here targets `netstandard2.1` and intentionally avoids APIs newer than that (no
 `ProcessStartInfo.ArgumentList`, `OperatingSystem.IsWindows()`, `Convert.ToHexString`, etc.) so the
