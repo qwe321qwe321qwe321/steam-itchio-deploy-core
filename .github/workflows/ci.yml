@@ -13,4 +13,4 @@ jobs:
         with:
           dotnet-version: 8.0.x
       - run: dotnet build
-      - run: dotnet test tests/SteamItchIoDeployerCore.Tests.csproj
+      - run: dotnet test .tests/SteamItchIoDeployerCore.Tests.csproj

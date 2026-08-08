@@ -42,11 +42,18 @@ the same shape in each engine:
 ## Consuming this from a Unity or Godot project
 
 Both consumer repos compile plain `.cs` files directly (no NuGet package is published); add this
-repo as a git submodule and point your `.asmdef`/`.csproj` at the `src/` folder, e.g.:
+repo as a git submodule anywhere under the consuming project:
 
 ```
 git submodule add https://github.com/qwe321qwe321qwe321/steam-itchio-deploy-core.git ThirdParty/SteamItchIoDeployCore
 ```
+
+Only `src/` is meant to be compiled by consumers — it carries its own Unity `.asmdef` so a Unity
+project can call into it with no extra wiring. `.tests/` holds this repo's own xUnit test suite and
+is deliberately named with a leading dot: both Unity's `AssetDatabase` and the default `.NET SDK`
+project glob Godot's C# projects use ignore dot-prefixed directories, so it's automatically excluded
+from whatever a consuming project compiles, even though the whole repo is checked out as one
+submodule (no sparse-checkout or exclude rules required on the consumer's side).
 
 Every type here targets `netstandard2.1` and intentionally avoids APIs newer than that (no
 `ProcessStartInfo.ArgumentList`, `OperatingSystem.IsWindows()`, `Convert.ToHexString`, etc.) so the
@@ -57,7 +64,7 @@ runtime.
 
 ```
 dotnet build                                   # library only
-dotnet test tests/SteamItchIoDeployerCore.Tests.csproj
+dotnet test .tests/SteamItchIoDeployerCore.Tests.csproj
 ```
 
 ## License
