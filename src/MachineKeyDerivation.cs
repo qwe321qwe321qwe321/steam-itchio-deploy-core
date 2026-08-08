@@ -30,6 +30,13 @@ namespace SteamItchIoDeployerCore
             }
         }
 
+        /// <summary>
+        /// Uppercase hex, matching <c>Convert.ToHexString</c>'s casing exactly: Godot's original
+        /// DeriveMachinePassword used that API, and this derived string is used as an encryption
+        /// passphrase for already-saved credentials.cfg files, so the casing is a compatibility
+        /// requirement, not a style choice — a different casing would silently fail to decrypt
+        /// credentials saved before this was extracted here.
+        /// </summary>
         public static string Sha256Hex(string material)
         {
             byte[] hash = Sha256(material);
@@ -37,7 +44,7 @@ namespace SteamItchIoDeployerCore
             // this file is compiled directly (as source) by Unity's older API compatibility profiles too.
             var sb = new StringBuilder(hash.Length * 2);
             foreach (byte b in hash)
-                sb.Append(b.ToString("x2"));
+                sb.Append(b.ToString("X2"));
             return sb.ToString();
         }
     }
